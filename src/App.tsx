@@ -121,26 +121,26 @@ export default function App() {
                 {/* Card 1: Today's Orders */}
                 <KPICard
                   id="kpi-today-orders"
-                  title="Today's Orders"
+                  title="Selected Day Orders"
                   value={daily_summary.today_orders}
                   isCurrency={false}
                   icon={ShoppingBag}
                   colorScheme="blue"
-                  subtitle={`Avg: ${(daily_summary.today_orders / 24).toFixed(1)}/hr pace`}
-                  badgeText="Live Today"
+                  subtitle={`Avg: ${(daily_summary.today_orders / 24).toFixed(1)} SIMs/hr pace`}
+                  badgeText={`${daily_summary.today_orders} Units Today`}
                 />
 
                 {/* Card 2: Today's Revenue */}
                 <KPICard
                   id="kpi-today-revenue"
-                  title="Today's Revenue"
+                  title="Selected Day Revenue"
                   value={daily_summary.today_revenue}
                   isCurrency={true}
                   decimals={2}
                   icon={IndianRupee}
                   colorScheme="green"
                   subtitle={`AOV: ${formatINR(avgOrderValueToday, true)}`}
-                  badgeText="+8.4% vs yday"
+                  badgeText={`${formatINR(daily_summary.today_revenue, false)} Gross`}
                 />
 
                 {/* Card 3: This Month's Orders */}
@@ -151,8 +151,8 @@ export default function App() {
                   isCurrency={false}
                   icon={PackageCheck}
                   colorScheme="purple"
-                  subtitle="94% of monthly target"
-                  badgeText="594 Activated"
+                  subtitle="Total monthly activations"
+                  badgeText={`${daily_summary.month_orders} Total Units`}
                 />
 
                 {/* Card 4: This Month's Revenue */}
@@ -165,7 +165,7 @@ export default function App() {
                   icon={CreditCard}
                   colorScheme="orange"
                   subtitle={`Avg: ${formatINR(avgOrderValueMonth, false)}/order`}
-                  badgeText="+16% MoM"
+                  badgeText="Monthly Total"
                 />
               </div>
             </section>
@@ -176,6 +176,8 @@ export default function App() {
               <DailySalesChart
                 data={daily_sales}
                 isDarkMode={isDarkMode}
+                selectedDate={reportDate}
+                onDateChange={handleDateChange}
               />
 
               {/* Monthly Sales Trend Chart */}

@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Radio,
   Calendar,
   RotateCw,
   Sun,
   Moon,
-  Signal
+  Signal,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { formatDate } from '../utils/formatters';
 
@@ -25,11 +27,23 @@ export const Header: React.FC<HeaderProps> = ({
   onRefresh,
   isRefreshing,
   isDarkMode,
-  onToggleDarkMode,
-  lastUpdated
+  onToggleDarkMode
 }) => {
-  const [activeTimeframe, setActiveTimeframe] = useState<'today' | 'week' | 'month'>('today');
   const formattedTodayBadge = formatDate(reportDate, true);
+
+  const handleStepDay = (delta: number) => {
+    const [y, m, d] = reportDate.split('-').map(Number);
+    const currentDate = new Date(y, m - 1, d);
+    currentDate.setDate(currentDate.getDate() + delta);
+    const nextY = currentDate.getFullYear();
+    const nextM = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const nextD = String(currentDate.getDate()).padStart(2, '0');
+    onDateChange(`${nextY}-${nextM}-${nextD}`);
+  };
+
+  const handlePresetClick = (dateStr: string) => {
+    onDateChange(dateStr);
+  };
 
   return (
     <header
@@ -54,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Performance analytics for {formattedTodayBadge}
+              Active Performance for <strong className="text-indigo-600 dark:text-indigo-400 font-semibold underline underline-offset-2">{formattedTodayBadge}</strong>
             </p>
           </div>
         </div>
@@ -62,58 +76,98 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Controls & Actions */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-start md:self-auto">
           
-          {/* Quick Timeframe Range Switcher */}
+          {/* Quick Date Presets */}
           <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 sm:p-1 border border-slate-200/60 dark:border-slate-700/60">
             <button
-              onClick={() => setActiveTimeframe('today')}
-              className={`px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-                activeTimeframe === 'today'
-                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs border border-slate-200/80 dark:border-slate-600'
+              id="preset-today"
+              onClick={() => handlePresetClick('2026-05-24')}
+              title="May 24, 2026 (Live sample day)"
+              className={`px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                reportDate === '2026-05-24'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs border border-slate-200/80 dark:border-slate-600'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
               Today
             </button>
             <button
-              onClick={() => setActiveTimeframe('week')}
-              className={`px-2.5 sm:px-3 py-1 text-xs rounded-md transition-all ${
-                activeTimeframe === 'week'
-                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs border border-slate-200/80 dark:border-slate-600 font-semibold'
+              id="preset-peak"
+              onClick={() => handlePresetClick('2026-05-18')}
+              title="May 18, 2026 (Peak day: 48 SIMs, ₹38.4k)"
+              className={`px-2.5 sm:px-3 py-1 text-xs rounded-md transition-all cursor-pointer ${
+                reportDate === '2026-05-18'
+                  ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-300 shadow-xs border border-slate-200/80 dark:border-slate-600 font-semibold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
-              Week
+              Peak Day
             </button>
             <button
-              onClick={() => setActiveTimeframe('month')}
-              className={`px-2.5 sm:px-3 py-1 text-xs rounded-md transition-all ${
-                activeTimeframe === 'month'
-                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs border border-slate-200/80 dark:border-slate-600 font-semibold'
+              id="preset-trough"
+              onClick={() => handlePresetClick('2026-05-07')}
+              title="May 7, 2026 (Trough day: 11 SIMs, ₹8.9k)"
+              className={`px-2.5 sm:px-3 py-1 text-xs rounded-md transition-all cursor-pointer ${
+                reportDate === '2026-05-07'
+                  ? 'bg-white dark:bg-slate-700 text-rose-600 dark:text-rose-300 shadow-xs border border-slate-200/80 dark:border-slate-600 font-semibold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
-              Month
+              Trough Day
+            </button>
+            <button
+              id="preset-mid"
+              onClick={() => handlePresetClick('2026-05-15')}
+              title="May 15, 2026 (36 SIMs, ₹28.8k)"
+              className={`hidden lg:inline-block px-2.5 py-1 text-xs rounded-md transition-all cursor-pointer ${
+                reportDate === '2026-05-15'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs border border-slate-200/80 dark:border-slate-600 font-semibold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              Mid Month
             </button>
           </div>
 
           <div className="hidden sm:block h-6 w-px bg-slate-200 dark:bg-slate-700 mx-0.5" />
 
-          {/* Date Picker Input */}
-          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 shadow-2xs">
-            <Calendar className="h-3.5 w-3.5 text-slate-400" />
-            <label htmlFor="report-date-picker" className="sr-only">Select Report Date</label>
-            <input
-              id="report-date-picker"
-              type="date"
-              value={reportDate}
-              onChange={(e) => {
-                if (e.target.value) {
-                  onDateChange(e.target.value);
-                }
-              }}
-              className="bg-transparent text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
-              title="Select Report Date"
-            />
+          {/* Date Picker Input with Prev / Next Steppers */}
+          <div className="flex items-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-0.5 shadow-2xs">
+            <button
+              id="date-prev-btn"
+              onClick={() => handleStepDay(-1)}
+              className="p-1 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              title="Previous Day"
+              aria-label="Previous Day"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
+
+            <div className="flex items-center gap-1.5 px-2 py-0.5">
+              <Calendar className="h-3.5 w-3.5 text-indigo-500" />
+              <label htmlFor="report-date-picker" className="sr-only">Select Report Date</label>
+              <input
+                id="report-date-picker"
+                type="date"
+                value={reportDate}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    onDateChange(e.target.value);
+                  }
+                }}
+                className="bg-transparent text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
+                title="Select Report Date"
+              />
+            </div>
+
+            <button
+              id="date-next-btn"
+              onClick={() => handleStepDay(1)}
+              className="p-1 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              title="Next Day"
+              aria-label="Next Day"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
           </div>
 
           {/* High Density Theme Refresh Button (Indigo) */}
